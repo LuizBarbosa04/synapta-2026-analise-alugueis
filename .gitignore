@@ -1,0 +1,26 @@
+
+# Dataset original
+data.csv
+data/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# Arquivos temporários do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Arquivos de ambiente e segredos
+.env
+.env.*
+
+# Arquivos temporários de editores
+.vscode/
+.idea/
+
+# Arquivos temporários do sistema
+.DS_Store
+Thumbs.db

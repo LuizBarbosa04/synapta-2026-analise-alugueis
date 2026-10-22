@@ -1,0 +1,488 @@
+
+import pandas as pd
+from pathlib import Path
+
+# Etapa 1 - Carregar o dataset
+df = pd.read_csv("data.csv")
+
+# Etapa 2 - Preservar a base original
+df_geral = df.copy()
+
+# Etapa 3 - Selecionar imóveis com área positiva
+df_area_valida = df[df["area"] > 0].copy()
+
+# Etapa 4 - Verificar os resultados
+print("Base geral:", len(df_geral))
+print("Base com área válida:", len(df_area_valida))
+print("Registros desconsiderados:",
+      len(df_geral) - len(df_area_valida))
+
+
+# Registrar a primeira decisão de tratamento
+decisao = {
+    "Problema": "Imóveis com área igual a zero",
+    "Quantidade": len(df_geral) - len(df_area_valida),
+    "Decisão": "Filtrar apenas nas análises de área",
+    "Justificativa": "Área zero não representa uma metragem válida",
+    "Impacto": "Dois registros fora das análises de área"
+}
+
+print("\nREGISTRO DE TRATAMENTO")
+for campo, valor in decisao.items():
+    print(f"{campo}: {valor}")
+
+# Etapa 2.4 - Verificar valores ausentes
+
+print("\nVERIFICAÇÃO DE VALORES AUSENTES")
+
+valores_ausentes = df_geral.isnull().sum()
+
+print(valores_ausentes)
+
+print("\nTotal de valores ausentes:",
+      valores_ausentes.sum())
+
+# Etapa 2.5 - Verificar registros duplicados
+
+print("\nVERIFICAÇÃO DE DUPLICADOS")
+
+duplicados = df_geral.duplicated()
+
+quantidade_duplicados = duplicados.sum()
+
+print("Total de registros duplicados:",
+      quantidade_duplicados)
+
+if quantidade_duplicados > 0:
+    print("\nRegistros duplicados encontrados:")
+    print(df_geral[duplicados].head())
+else:
+    print("Nenhuma linha totalmente duplicada encontrada.")
+
+
+# Etapa 2.6 - Investigar valores dos aluguéis
+
+print("\nANÁLISE INICIAL DOS ALUGUÉIS")
+
+print(df_geral["rent"].describe())
+
+print("\nOS 5 MAIORES ALUGUÉIS")
+
+maiores_alugueis = df_geral.nlargest(5, "rent")
+
+print(
+    maiores_alugueis[
+        ["district", "area", "bedrooms", "rent"]
+    ].to_string(index=False)
+)
+
+
+# Etapa 2.7 - Investigar o maior aluguel
+
+print("\nINVESTIGAÇÃO DO MAIOR ALUGUEL")
+
+maior_aluguel = df_geral.nlargest(1, "rent")
+
+print(maior_aluguel.to_string(index=False))
+
+# Calcular o preço por metro quadrado
+area = maior_aluguel["area"].iloc[0]
+aluguel = maior_aluguel["rent"].iloc[0]
+
+if area > 0:
+    preco_m2 = aluguel / area
+    print(f"\nPreço por m²: R$ {preco_m2:.2f}")
+
+
+# Etapa 2.8 - Análise de sensibilidade
+
+print("\nIMPACTO DO MAIOR ALUGUEL")
+
+media_original = df_geral["rent"].mean()
+
+# Retirar somente a primeira ocorrência
+# do maior aluguel da cópia de análise
+indice_maior = df_geral["rent"].idxmax()
+
+df_sem_maior = df_geral.drop(index=indice_maior)
+
+media_sem_maior = df_sem_maior["rent"].mean()
+
+diferenca = media_original - media_sem_maior
+
+print(f"Média original: R$ {media_original:.2f}")
+print(f"Média sem o maior registro: R$ {media_sem_maior:.2f}")
+print(f"Diferença: R$ {diferenca:.2f}")
+
+
+# Etapa 2.9 - Comparação entre studios e kitnets
+
+print("\nANÁLISE DE STUDIOS E KITNETS")
+
+studios = df_geral[
+    df_geral["type"] == "Studio e kitnet"
+].copy()
+
+print("Quantidade de studios:", len(studios))
+
+print("\nEstatísticas dos aluguéis:")
+print(studios["rent"].describe())
+
+print("\nOs 5 studios mais caros:")
+print(
+    studios.nlargest(5, "rent")[
+        ["district", "area", "rent"]
+    ].to_string(index=False)
+)
+
+
+# Etapa 2.10 - Sensibilidade da média dos studios
+
+print("\nIMPACTO DO MAIOR ALUGUEL NOS STUDIOS")
+
+media_studios = studios["rent"].mean()
+
+# Criar uma cópia sem o registro mais caro
+indice_maior_studio = studios["rent"].idxmax()
+studios_sem_maior = studios.drop(index=indice_maior_studio)
+
+media_sem_maior = studios_sem_maior["rent"].mean()
+
+diferenca = media_studios - media_sem_maior
+impacto_percentual = (diferenca / media_studios) * 100
+
+print(f"Média original: R$ {media_studios:.2f}")
+print(f"Média sem o maior studio: R$ {media_sem_maior:.2f}")
+print(f"Diferença: R$ {diferenca:.2f}")
+print(f"Impacto percentual: {impacto_percentual:.2f}%")
+
+
+# Etapa 2.11 - Registro de valor atípico
+
+registro_outlier = {
+    "Problema": "Studio com aluguel muito elevado",
+    "Localidade": "Planalto Paulista",
+    "Aluguel": 25000,
+    "Área": 24,
+    "Decisão": "Preservar na análise principal",
+    "Justificativa": (
+        "Não há evidência suficiente para "
+        "confirmar erro no anúncio"
+    ),
+    "Impacto geral": "Redução de 0,057% na média",
+    "Impacto nos studios": "Redução de 0,78% na média",
+    "Limitação": (
+        "A veracidade do valor anunciado "
+        "não foi confirmada externamente"
+    )
+}
+
+print("\nREGISTRO DE VALOR ATÍPICO")
+
+for campo, valor in registro_outlier.items():
+    print(f"{campo}: {valor}")
+
+
+# Etapa 3.1 - Distribuição dos aluguéis
+
+import matplotlib.pyplot as plt
+
+print("\nDISTRIBUIÇÃO DOS ALUGUÉIS")
+
+media = df_geral["rent"].mean()
+mediana = df_geral["rent"].median()
+
+plt.figure(figsize=(10, 6))
+
+plt.hist(
+    df_geral["rent"],
+    bins=40,
+    color="steelblue",
+    edgecolor="white"
+)
+
+plt.axvline(
+    media,
+    color="red",
+    linestyle="--",
+    label=f"Média: R$ {media:,.2f}"
+)
+
+plt.axvline(
+    mediana,
+    color="green",
+    linestyle="--",
+    label=f"Mediana: R$ {mediana:,.2f}"
+)
+
+plt.title("Distribuição dos preços de aluguel em São Paulo")
+plt.xlabel("Aluguel anunciado (R$)")
+plt.ylabel("Quantidade de imóveis")
+plt.legend()
+
+plt.tight_layout()
+
+# Criar uma pasta para armazenar os gráficos
+pasta_graficos = Path("graficos")
+pasta_graficos.mkdir(exist_ok=True)
+
+# Salvar o histograma em alta resolução
+plt.savefig(
+    pasta_graficos / "distribuicao_alugueis.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()
+
+print("\nGráfico salvo com sucesso!")
+
+
+# Etapa 3.3 - Quantidade de imóveis por localidade
+
+print("\nANÚNCIOS POR LOCALIDADE")
+
+quantidade_bairros = df_geral["district"].value_counts()
+
+print("\n10 localidades com mais anúncios:")
+print(quantidade_bairros.head(10))
+
+print("\nTotal de localidades:")
+print(df_geral["district"].nunique())
+
+print("\nLocalidades com pelo menos 30 anúncios:")
+print((quantidade_bairros >= 30).sum())
+
+print("\nLocalidades com menos de 30 anúncios:")
+print((quantidade_bairros < 30).sum())
+
+
+# Etapa 3.4 - Cobertura das localidades selecionadas
+
+print("\nCOBERTURA DAS LOCALIDADES")
+
+bairros_validos = quantidade_bairros[
+    quantidade_bairros >= 30
+].index
+
+df_bairros_validos = df_geral[
+    df_geral["district"].isin(bairros_validos)
+].copy()
+
+quantidade = len(df_bairros_validos)
+total = len(df_geral)
+
+percentual = (quantidade / total) * 100
+
+print("Anúncios nas localidades selecionadas:", quantidade)
+print("Total de anúncios:", total)
+print(f"Cobertura da análise: {percentual:.2f}%")
+
+
+# Etapa 3.5 - Preços médios por localidade
+
+print("\nANÁLISE DOS ALUGUÉIS POR LOCALIDADE")
+
+resumo_bairros = (
+    df_bairros_validos
+    .groupby("district")
+    .agg(
+        quantidade=("rent", "count"),
+        aluguel_medio=("rent", "mean"),
+        aluguel_mediano=("rent", "median")
+    )
+    .sort_values("aluguel_medio", ascending=False)
+)
+
+print("\n5 LOCALIDADES COM MAIORES ALUGUÉIS MÉDIOS")
+
+print(
+    resumo_bairros.head(5).round(2).to_string()
+)
+
+print("\n5 LOCALIDADES COM MENORES ALUGUÉIS MÉDIOS")
+
+print(
+    resumo_bairros.tail(5)
+    .sort_values("aluguel_medio")
+    .round(2)
+    .to_string()
+)
+
+
+
+# Etapa 3.7 - Gráfico aprimorado por localidade
+
+maiores = resumo_bairros.head(5)
+menores = resumo_bairros.tail(5)
+
+comparacao = pd.concat([maiores, menores])
+comparacao = comparacao.sort_values("aluguel_medio")
+
+cores = [
+    "steelblue" if bairro in menores.index else "darkorange"
+    for bairro in comparacao.index
+]
+
+fig, ax = plt.subplots(figsize=(12, 7))
+
+barras = ax.barh(
+    comparacao.index,
+    comparacao["aluguel_medio"],
+    color=cores
+)
+
+# Adicionar valor médio e quantidade de anúncios
+for barra, (_, linha) in zip(
+    barras, comparacao.iterrows()
+):
+    valor = linha["aluguel_medio"]
+    quantidade = int(linha["quantidade"])
+
+    ax.text(
+        valor + 100,
+        barra.get_y() + barra.get_height() / 2,
+        f"R$ {valor:,.0f} (n={quantidade})",
+        va="center",
+        fontsize=9
+    )
+
+ax.set_title(
+    "Maiores e menores aluguéis médios por localidade"
+)
+ax.set_xlabel("Aluguel médio anunciado (R$)")
+ax.set_ylabel("Localidade")
+
+# Reservar espaço para os rótulos
+ax.set_xlim(
+    0,
+    comparacao["aluguel_medio"].max() * 1.35
+)
+
+fig.text(
+    0.5, 0.01,
+    "Apenas localidades com pelo menos 30 anúncios. "
+    "n = quantidade de anúncios.",
+    ha="center",
+    fontsize=9
+)
+
+fig.tight_layout(rect=[0, 0.04, 1, 1])
+
+fig.savefig(
+    pasta_graficos / "aluguel_medio_localidades.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()
+
+print("Gráfico aprimorado salvo com sucesso!")
+
+
+# Etapa 3.8 - Relação entre área e aluguel
+
+print("\nANÁLISE DA RELAÇÃO ENTRE ÁREA E ALUGUEL")
+
+# Utilizar somente imóveis com área positiva
+dados_area = df_area_valida.copy()
+
+# Calcular correlação
+correlacao = dados_area["area"].corr(
+    dados_area["rent"]
+)
+
+print(f"Correlação de Pearson: {correlacao:.3f}")
+
+# Criar gráfico de dispersão
+plt.figure(figsize=(10, 6))
+
+plt.scatter(
+    dados_area["area"],
+    dados_area["rent"],
+    alpha=0.25,
+    s=12,
+    color="steelblue"
+)
+
+plt.title("Relação entre área e aluguel em São Paulo")
+plt.xlabel("Área do imóvel (m²)")
+plt.ylabel("Aluguel anunciado (R$)")
+
+plt.tight_layout()
+
+plt.savefig(
+    pasta_graficos / "area_vs_aluguel.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()
+
+print("Gráfico de área e aluguel salvo com sucesso!")
+
+
+# Etapa 3.9 - Relação entre quartos e aluguel
+
+print("\nANÁLISE DE ALUGUEL POR QUANTIDADE DE QUARTOS")
+
+resumo_quartos = (
+    df_geral
+    .groupby("bedrooms")
+    .agg(
+        quantidade=("rent", "count"),
+        aluguel_medio=("rent", "mean"),
+        aluguel_mediano=("rent", "median")
+    )
+    .sort_index()
+)
+
+print(resumo_quartos.round(2).to_string())
+
+
+# Etapa 3.10 - Gráfico de aluguel por quartos
+
+print("\nGERANDO GRÁFICO POR QUANTIDADE DE QUARTOS")
+
+fig, ax = plt.subplots(figsize=(10, 6))
+
+barras = ax.bar(
+    resumo_quartos.index.astype(str),
+    resumo_quartos["aluguel_medio"],
+    color="steelblue"
+)
+
+for barra, (_, linha) in zip(
+    barras, resumo_quartos.iterrows()
+):
+    altura = barra.get_height()
+    quantidade = int(linha["quantidade"])
+
+    ax.text(
+        barra.get_x() + barra.get_width() / 2,
+        altura + 150,
+        f"n={quantidade}",
+        ha="center",
+        fontsize=9
+    )
+
+ax.set_title("Aluguel médio por quantidade de quartos")
+ax.set_xlabel("Quantidade de quartos")
+ax.set_ylabel("Aluguel médio anunciado (R$)")
+
+ax.set_ylim(
+    0,
+    resumo_quartos["aluguel_medio"].max() * 1.2
+)
+
+fig.tight_layout()
+
+fig.savefig(
+    pasta_graficos / "aluguel_por_quartos.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()
+
+print("Gráfico por quantidade de quartos salvo!")
