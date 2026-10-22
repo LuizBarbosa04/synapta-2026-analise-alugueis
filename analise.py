@@ -1,9 +1,24 @@
-
 import pandas as pd
+import matplotlib.pyplot as plt
 from pathlib import Path
 
-# Etapa 1 - Carregar o dataset
-df = pd.read_csv("data.csv")
+def formatar_numero(valor, casas=2):
+    """Formata números com separadores brasileiros."""
+    texto = f"{valor:,.{casas}f}"
+    return texto.replace(",", "X").replace(".", ",").replace("X", ".")
+
+# Identificar a pasta onde está este arquivo Python
+PASTA_PROJETO = Path(__file__).resolve().parent
+
+# Definir os caminhos dos dados e gráficos
+CAMINHO_DADOS = PASTA_PROJETO / "data.csv"
+pasta_graficos = PASTA_PROJETO / "graficos"
+
+# Garantir a existência da pasta de gráficos
+pasta_graficos.mkdir(exist_ok=True)
+
+# Carregar o dataset
+df = pd.read_csv(CAMINHO_DADOS)
 
 # Etapa 2 - Preservar a base original
 df_geral = df.copy()
@@ -156,21 +171,25 @@ print(f"Média sem o maior studio: R$ {media_sem_maior:.2f}")
 print(f"Diferença: R$ {diferenca:.2f}")
 print(f"Impacto percentual: {impacto_percentual:.2f}%")
 
+# Etapa 2.11 - Registro automático do valor atípico
 
-# Etapa 2.11 - Registro de valor atípico
+impacto_geral = (
+    (media_original - df_sem_maior["rent"].mean())
+    / media_original
+) * 100
 
 registro_outlier = {
-    "Problema": "Studio com aluguel muito elevado",
-    "Localidade": "Planalto Paulista",
-    "Aluguel": 25000,
-    "Área": 24,
+    "Problema": "Imóvel com aluguel muito elevado",
+    "Localidade": maior_aluguel["district"].iloc[0],
+    "Aluguel": (f"R$ {formatar_numero(maior_aluguel['rent'].iloc[0])}"),
+    "Área": (f"{formatar_numero(maior_aluguel['area'].iloc[0], 0)} m²"),
     "Decisão": "Preservar na análise principal",
     "Justificativa": (
         "Não há evidência suficiente para "
         "confirmar erro no anúncio"
     ),
-    "Impacto geral": "Redução de 0,057% na média",
-    "Impacto nos studios": "Redução de 0,78% na média",
+    "Impacto geral": (f"Redução de {formatar_numero(impacto_geral, 3)}% na média"),
+    "Impacto nos studios": (f"Redução de {formatar_numero(impacto_percentual)}% na média"),
     "Limitação": (
         "A veracidade do valor anunciado "
         "não foi confirmada externamente"
@@ -182,10 +201,7 @@ print("\nREGISTRO DE VALOR ATÍPICO")
 for campo, valor in registro_outlier.items():
     print(f"{campo}: {valor}")
 
-
 # Etapa 3.1 - Distribuição dos aluguéis
-
-import matplotlib.pyplot as plt
 
 print("\nDISTRIBUIÇÃO DOS ALUGUÉIS")
 
@@ -221,10 +237,6 @@ plt.ylabel("Quantidade de imóveis")
 plt.legend()
 
 plt.tight_layout()
-
-# Criar uma pasta para armazenar os gráficos
-pasta_graficos = Path("graficos")
-pasta_graficos.mkdir(exist_ok=True)
 
 # Salvar o histograma em alta resolução
 plt.savefig(
@@ -486,3 +498,39 @@ fig.savefig(
 plt.show()
 
 print("Gráfico por quantidade de quartos salvo!")
+
+
+# Etapa 5.10 - Sensibilidade ao limite de anúncios
+
+print("\nSENSIBILIDADE AO LIMITE DE ANÚNCIOS")
+
+for limite in [20, 30, 50]:
+
+    contagem = df_geral["district"].value_counts()
+
+    localidades_validas = contagem[
+        contagem >= limite
+    ].index
+
+    dados_filtrados = df_geral[
+        df_geral["district"].isin(localidades_validas)
+    ]
+
+    medias = (
+        dados_filtrados
+        .groupby("district")["rent"]
+        .mean()
+        .sort_values(ascending=False)
+    )
+
+    cobertura = len(dados_filtrados) / len(df_geral) * 100
+
+    print(f"\nLIMITE: {limite} ANÚNCIOS")
+    print("Localidades:", len(localidades_validas))
+    print(f"Cobertura: {cobertura:.2f}%")
+
+    print("\n3 maiores médias:")
+    print(medias.head(3).round(2))
+
+    print("\n3 menores médias:")
+    print(medias.tail(3).sort_values().round(2))
