@@ -47,16 +47,22 @@ As descrições refletem a interpretação utilizada nesta análise; a base não
 
 ## 4. Metodologia
 
-1. Leitura e inspeção do dataset.
-2. Verificação de valores ausentes, duplicações exatas e inconsistências.
-3. Preservação dos registros originais: dois anúncios com área igual a zero foram desconsiderados **somente nas análises que dependem de área válida**.
-4. Investigação de um anúncio atípico, com aluguel de R$ 25.000 para 24 m², sem exclusão automática.
-5. Cálculo de média, mediana e distribuição dos aluguéis.
-6. Comparação dos aluguéis médios entre localidades com **pelo menos 30 anúncios**; teste adicional dos limites de 20 e 50 anúncios.
-7. Análise da associação entre área e aluguel e comparação dos valores por quantidade de quartos.
-8. Construção e interpretação de quatro gráficos.
+A análise exploratória foi desenvolvida nas seguintes etapas:
 
-O limite de 30 anúncios foi escolhido como critério **exploratório**, não como garantia de representatividade estatística.
+1. Leitura e inspeção do dataset, composto por 11.657 anúncios e oito variáveis.
+2. Verificação de valores ausentes, duplicações exatas e possíveis inconsistências.
+3. Identificação de dois registros com área igual a zero, desconsiderados exclusivamente das análises que exigem área positiva.
+4. Investigação de valores extremos, incluindo um anúncio de R$ 25.000 para um studio de 24 m², sem exclusão automática.
+5. Cálculo de estatísticas descritivas e análise da distribuição dos aluguéis.
+6. Comparação entre localidades com pelo menos 30 anúncios e análise de sensibilidade utilizando limites de 20, 30 e 50 registros.
+7. Investigação da associação entre área e aluguel, por meio da correlação de Pearson, e comparação dos aluguéis por quantidade de quartos.
+8. Cálculo do aluguel por metro quadrado para os 11.655 imóveis com área positiva, investigação de registros com áreas extremamente pequenas e análise de sensibilidade dos limites mínimos de área.
+9. Comparação entre quatro tipos de imóveis, considerando quantidade de anúncios, média e mediana, com investigação adicional dos maiores valores de casas em condomínio.
+10. Construção e interpretação de seis gráficos, acompanhados de conclusões e limitações metodológicas.
+
+**Decisões metodológicas:** preservar os registros originais sempre que não houver evidência suficiente para comprovar erros; utilizar análises de sensibilidade para examinar a influência dos critérios de seleção; e evitar interpretações causais a partir de associações descritivas.
+
+O limite mínimo de 30 anúncios por localidade é um critério exploratório, não uma garantia de estabilidade ou representatividade estatística.
 
 ## 5. Resultados e visualizações
 
@@ -133,15 +139,17 @@ Esses resultados demonstram a importância de analisar média e mediana conjunta
 
 ![Aluguel médio e mediano por tipo de imóvel](graficos/aluguel_por_tipo_imovel.png)
 
-## 6. Cinco conclusões principais
+## 6. Principais conclusões
 
-1. **Os aluguéis anunciados têm distribuição assimétrica à direita:** a média de R$ 3.250,81 supera a mediana de R$ 2.415,00.
-2. **Existem diferenças expressivas entre localidades:** no recorte com pelo menos 30 anúncios, Jardim Leonor apresentou média de R$ 7.455,74 e Taboão de R$ 1.473,14.
-3. **Área e aluguel apresentam associação positiva:** correlação de Pearson de 0,667 na amostra com área positiva.
-4. **A quantidade de quartos acompanha uma tendência geral de aumento do aluguel**, embora haja exceções e grupos com poucos anúncios.
-5. **A influência de um valor extremo depende do grupo analisado:** a retirada experimental do maior aluguel teve impacto proporcional mais alto entre studios do que no conjunto completo.
+1. **Distribuição dos aluguéis:** a média de R$ 3.250,81 supera a mediana de R$ 2.415,00, indicando assimetria à direita na distribuição dos valores anunciados.
+2. **Diferenças entre localidades:** considerando pelo menos 30 anúncios por localidade, Jardim Leonor apresentou o maior aluguel médio (R$ 7.455,74) e Taboão o menor (R$ 1.473,14). Os rankings variam conforme o limite mínimo de anúncios.
+3. **Relação entre área e aluguel:** a correlação de Pearson foi de 0,667 nos 11.655 imóveis com área positiva, indicando associação linear positiva, sem comprovar causalidade.
+4. **Quantidade de quartos:** observou-se tendência geral de aluguéis mais elevados em imóveis com mais quartos, embora existam exceções e grupos com poucos registros.
+5. **Influência de valores extremos:** a retirada experimental do anúncio de R$ 25.000 reduziu a média geral em aproximadamente 0,057% e a média dos studios em aproximadamente 0,78%.
+6. **Aluguel por metro quadrado:** foram identificados quatro anúncios com áreas inferiores a 5 m². Sua exclusão experimental reduziu a média do aluguel por m² de R$ 46,69 para R$ 45,65, enquanto a mediana permaneceu em R$ 37,50.
+7. **Diferenças por tipo de imóvel:** casas em condomínio apresentaram o maior aluguel médio (R$ 3.912,55), mas não a maior mediana. Isso evidencia a importância de comparar diferentes medidas estatísticas.
 
-A discussão detalhada, a análise de sensibilidade e a resposta completa à pergunta orientadora estão em [CONCLUSOES.md](CONCLUSOES.md).
+As análises detalhadas, as decisões metodológicas, as limitações e a resposta à pergunta orientadora estão documentadas em [CONCLUSOES.md](CONCLUSOES.md).
 
 ## 7. Limitações
 
@@ -151,6 +159,7 @@ A discussão detalhada, a análise de sensibilidade e a resposta completa à per
 - As localidades têm quantidades diferentes de registros, e a classificação muda com o limite mínimo adotado.
 - Características como conservação e localização não foram controladas simultaneamente nas comparações.
 - A veracidade do anúncio de R$ 25.000 não foi confirmada externamente.
+- As áreas extremamente pequenas não foram verificadas nos anúncios originais.
 - O arquivo CSV foi obtido anteriormente; o download diretamente do Kaggle não foi novamente testado durante a auditoria de reprodução.
 
 ## 8. Como executar o projeto
@@ -177,22 +186,28 @@ Python 3.12 e acesso ao dataset no Kaggle. Git é opcional se o repositório for
    python analise.py
    ```
 
-O programa exibe estatísticas no terminal e salva quatro imagens na pasta `graficos/`. Dependendo do ambiente, as janelas dos gráficos podem precisar ser fechadas para a execução continuar.
+O programa apresenta os resultados estatísticos no terminal e gera seis gráficos na pasta `graficos/`. Dependendo do ambiente, pode ser necessário fechar janelas abertas pelo Matplotlib para a execução prosseguir.
 
 ### Verificação de reprodutibilidade realizada
 
-O projeto foi clonado do GitHub para uma pasta separada. Em um novo ambiente virtual Python, foram instaladas as dependências do `requirements.txt`, copiado o CSV local já utilizado e executado o `analise.py` até o final, sem exceções. Os indicadores e os quatro gráficos foram reproduzidos.
+A reprodutibilidade foi avaliada inicialmente por meio da clonagem do repositório público do GitHub para uma pasta independente, com criação de um novo ambiente virtual Python e instalação das dependências declaradas no `requirements.txt`.
 
-Esse teste **não incluiu um novo download direto da página do Kaggle**.
+Foi utilizada uma cópia local do dataset obtido anteriormente. A execução reproduziu os resultados estatísticos e os quatro gráficos existentes naquela versão do projeto, sem apresentar exceções.
+
+Posteriormente, o projeto foi ampliado com análises do aluguel por metro quadrado, sensibilidade à área mínima e comparação por tipo de imóvel.
+
+Após essas atualizações, foi realizada uma nova execução integral do `analise.py` no ambiente de desenvolvimento, finalizada com **código de saída 0**, sem erros de execução. Também foi confirmada a presença dos seis arquivos de gráficos gerados.
+
+**Limitações da validação:** a versão ampliada ainda não foi reproduzida novamente em um ambiente virtual independente. Além disso, não foi realizado um novo download diretamente da página do Kaggle durante os testes de reprodutibilidade.
 
 ## 9. Declaração de uso de inteligência artificial generativa
 
 Foi utilizado **ChatGPT (OpenAI)** como apoio educacional e técnico para explicar conceitos estatísticos, orientar a elaboração e revisão de código Python com Pandas e Matplotlib, discutir tratamentos de dados e valores atípicos, sugerir gráficos, auxiliar na documentação e orientar procedimentos com Git e GitHub.
 
-**Verificações realizadas pelo candidato:** execução dos códigos em Python 3.12, conferência das saídas e dos indicadores estatísticos, inspeção dos gráficos, investigação de valores atípicos e teste completo da análise a partir de uma cópia clonada do repositório com ambiente virtual independente.
+**Verificações realizadas pelo candidato:** execução dos códigos em Python 3.12, conferência das saídas e dos indicadores estatísticos, inspeção dos gráficos, investigação de valores atípicos e teste da versão inicial a partir de uma cópia clonada do repositório com ambiente virtual independente. A versão ampliada foi executada integralmente no ambiente local.
 
 As interpretações são apresentadas com as limitações identificadas. A utilização da ferramenta não implica que ela tenha verificado externamente a veracidade dos anúncios. A obtenção direta do dataset pelo link do Kaggle continua sem um novo teste de download nesta auditoria.
 
 ## 10. Estado do projeto
 
-Análise exploratória executada e documentada; reprodutibilidade testada com cópia local do dataset. Projeto em revisão para submissão à Etapa 2 do processo seletivo SYNAPTA 2026.
+Análise exploratória executada e documentada, com seis gráficos gerados. A versão inicial teve reprodutibilidade testada em ambiente independente utilizando uma cópia local do dataset; a versão ampliada passou por execução integral no ambiente de desenvolvimento. Projeto em revisão final para submissão à Etapa 2 do processo seletivo SYNAPTA 2026.
