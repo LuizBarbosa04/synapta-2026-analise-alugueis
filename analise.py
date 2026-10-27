@@ -534,3 +534,151 @@ for limite in [20, 30, 50]:
 
     print("\n3 menores médias:")
     print(medias.tail(3).sort_values().round(2))
+# Etapa 6.1 - Analise do aluguel por metro quadrado
+
+print("\nANÁLISE DO ALUGUEL POR METRO QUADRADO")
+
+# Criar uma cópia somente com áreas positivas
+df_preco_m2 = df_area_valida.copy()
+
+# Calcular o aluguel por metro quadrado
+df_preco_m2["aluguel_m2"] = (
+    df_preco_m2["rent"] / df_preco_m2["area"]
+)
+
+# Conferir a quantidade de registros
+print("Imóveis analisados:", len(df_preco_m2))
+
+# Estatísticas do aluguel por m²
+print("\nEstatísticas do aluguel por m²:")
+print(df_preco_m2["aluguel_m2"].describe().round(2))
+
+# Identificar os 5 maiores preços por m²
+print("\n5 MAIORES ALUGUÉIS POR M²")
+
+print(
+    df_preco_m2.nlargest(5, "aluguel_m2")[
+        ["district", "type", "area", "rent", "aluguel_m2"]
+    ].round(2).to_string(index=False)
+)
+
+
+# Etapa 6.2 - Sensibilidade ao limite minimo de area
+
+print("\nSENSIBILIDADE DO ALUGUEL POR M² À ÁREA MÍNIMA")
+
+for area_minima in [1, 5, 10, 15, 20]:
+    df_teste = df_preco_m2[
+        df_preco_m2["area"] >= area_minima
+    ]
+
+    print(f"\nÁrea mínima: {area_minima} m²")
+    print("Quantidade de imóveis:", len(df_teste))
+    print(
+        "Média do aluguel/m²:",
+        round(df_teste["aluguel_m2"].mean(), 2)
+    )
+    print(
+        "Mediana do aluguel/m²:",
+        round(df_teste["aluguel_m2"].median(), 2)
+    )
+    print(
+        "Maior aluguel/m²:",
+        round(df_teste["aluguel_m2"].max(), 2)
+    )
+# Etapa 6.3 - Investigacao de areas inferiores a 5 m²
+
+print("\nINVESTIGAÇÃO DE IMÓVEIS COM ÁREA INFERIOR A 5 M²")
+
+imoveis_area_muito_pequena = df_preco_m2[
+    df_preco_m2["area"] < 5
+].copy()
+
+print("Quantidade de registros:", len(imoveis_area_muito_pequena))
+
+colunas_investigacao = [
+    "district",
+    "type",
+    "area",
+    "bedrooms",
+    "garage",
+    "rent",
+    "total",
+    "aluguel_m2"
+]
+
+print(
+    imoveis_area_muito_pequena[colunas_investigacao]
+    .round(2)
+    .to_string(index=False)
+)
+
+# Etapa 6.4 - Comparacao entre aluguel total e aluguel por m²
+
+print("\nCOMPARAÇÃO: ALUGUEL TOTAL X ALUGUEL POR M²")
+
+print("\n5 maiores aluguéis totais:")
+print(
+    df_preco_m2.nlargest(5, "rent")[
+        ["district", "type", "area", "rent", "aluguel_m2"]
+    ].round(2).to_string(index=False)
+)
+
+print("\n5 maiores aluguéis por m²:")
+print(
+    df_preco_m2.nlargest(5, "aluguel_m2")[
+        ["district", "type", "area", "rent", "aluguel_m2"]
+    ].round(2).to_string(index=False)
+)
+
+# Etapa 6.5 - Grafico de sensibilidade do aluguel por m²
+
+limites_area = [1, 5, 10, 15, 20]
+medias_m2 = []
+medianas_m2 = []
+
+for limite in limites_area:
+    dados_filtrados = df_preco_m2[
+        df_preco_m2["area"] >= limite
+    ]
+
+    medias_m2.append(
+        dados_filtrados["aluguel_m2"].mean()
+    )
+
+    medianas_m2.append(
+        dados_filtrados["aluguel_m2"].median()
+    )
+
+plt.figure(figsize=(9, 5))
+
+plt.plot(
+    limites_area,
+    medias_m2,
+    marker="o",
+    label="Média"
+)
+
+plt.plot(
+    limites_area,
+    medianas_m2,
+    marker="s",
+    label="Mediana"
+)
+
+plt.title("Sensibilidade do aluguel por m² à área mínima")
+plt.xlabel("Área mínima considerada (m²)")
+plt.ylabel("Aluguel por m² (R$)")
+plt.xticks(limites_area)
+plt.legend()
+plt.grid(alpha=0.3)
+plt.tight_layout()
+
+plt.savefig(
+    pasta_graficos / "sensibilidade_aluguel_m2.png",
+    dpi=150
+)
+
+plt.close()
+
+print("\nGráfico de sensibilidade do aluguel/m² salvo.")

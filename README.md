@@ -99,6 +99,24 @@ Há uma tendência geral de aluguéis médios mais altos em imóveis com mais qu
 
 Foi identificado um studio no Planalto Paulista, com **24 m²** e aluguel anunciado de **R$ 25.000**. A exclusão **experimental** desse anúncio reduziu a média geral em aproximadamente **0,057%** e a média dos studios em aproximadamente **0,78%**. O registro foi mantido na análise principal porque não havia evidência suficiente para comprovar erro.
 
+### 5.6 Aluguel por metro quadrado e sensibilidade à área
+
+A análise dos **11.655 imóveis com área positiva** apresentou aluguel médio de **R$ 46,69/m²** e mediano de **R$ 37,50/m²**.
+
+Foram identificados quatro registros com áreas inferiores a 5 m², incluindo uma casa em condomínio com quatro quartos, três vagas de garagem e área declarada de apenas 1 m², representando uma possível inconsistência cadastral.
+
+A exclusão experimental desses quatro registros reduziu a média para **R$ 45,65/m²**, enquanto a mediana permaneceu em R$ 37,50/m².
+
+Na análise de sensibilidade, ao considerar apenas imóveis com área de pelo menos 20 m², a média passou para **R$ 44,94/m²** e a mediana para **R$ 37,29/m²**.
+
+A comparação entre os rankings demonstrou que os imóveis com maiores aluguéis totais não são necessariamente aqueles com os maiores valores por metro quadrado.
+
+**Decisão metodológica:** os registros com áreas positivas foram preservados na análise principal. Os limites mínimos de área foram utilizados exclusivamente para avaliar a sensibilidade dos indicadores, sem excluir definitivamente observações suspeitas.
+
+**Conclusão:** a mediana apresentou maior estabilidade diante dos valores extremos investigados, reforçando a importância da avaliação de qualidade dos dados.
+
+![Sensibilidade do aluguel por metro quadrado](graficos/sensibilidade_aluguel_m2.png)
+
 ## 6. Cinco conclusões principais
 
 1. **Os aluguéis anunciados têm distribuição assimétrica à direita:** a média de R$ 3.250,81 supera a mediana de R$ 2.415,00.

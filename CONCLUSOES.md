@@ -55,7 +55,25 @@ Os rankings mudaram conforme o limite adotado. Com **20 anúncios**, Alphaville 
 
 **Limitação:** as classificações dependem do critério de inclusão e da composição dos anúncios. Não representam um ranking definitivo dos bairros de São Paulo.
 
-## 7. Resposta à pergunta orientadora
+## 7. Aluguel por metro quadrado e sensibilidade à área
+
+A análise do aluguel por metro quadrado considerou **11.655 imóveis com área positiva**. A média encontrada foi de **R$ 46,69/m²**, enquanto a mediana foi de **R$ 37,50/m²**.
+
+Foram identificados **quatro registros com áreas inferiores a 5 m²**. Entre eles, destaca-se uma casa em condomínio no Jardim dos Estados, com quatro quartos, três vagas de garagem e apenas 1 m² de área declarada, indicando uma possível inconsistência cadastral ainda não confirmada.
+
+A exclusão experimental desses quatro imóveis reduziu a média de **R$ 46,69/m² para R$ 45,65/m²**, uma diferença aproximada de 2,23%, enquanto a mediana permaneceu em R$ 37,50/m².
+
+Ao considerar somente imóveis com área de pelo menos 20 m², a média passou para **R$ 44,94/m²** e a mediana para **R$ 37,29/m²**.
+
+Também foi observado que os imóveis com maiores aluguéis totais não são necessariamente aqueles com os maiores valores por metro quadrado. Os rankings por m² foram particularmente influenciados por áreas declaradas muito pequenas.
+
+**Conclusão:** o aluguel por metro quadrado acrescenta uma perspectiva relevante à comparação dos preços, mas pode ser fortemente influenciado por registros com áreas potencialmente inconsistentes. A mediana apresentou maior estabilidade nos cenários investigados.
+
+**Decisão metodológica:** manter os 11.655 imóveis com área positiva na análise principal e utilizar diferentes limites mínimos de área apenas para avaliar a sensibilidade dos resultados, sem excluir definitivamente registros suspeitos.
+
+**Limitação:** não foi possível verificar os anúncios originais para confirmar eventuais erros de preenchimento. Além disso, o aluguel por metro quadrado não controla diferenças de localização, tipo de imóvel ou outras características.
+
+## 8. Resposta à pergunta orientadora
 
 **Quais características parecem acompanhar os maiores e os menores preços de aluguel e o que os dados não permitem concluir?**
 
