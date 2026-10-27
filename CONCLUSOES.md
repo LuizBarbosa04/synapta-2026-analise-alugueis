@@ -73,7 +73,21 @@ Também foi observado que os imóveis com maiores aluguéis totais não são nec
 
 **Limitação:** não foi possível verificar os anúncios originais para confirmar eventuais erros de preenchimento. Além disso, o aluguel por metro quadrado não controla diferenças de localização, tipo de imóvel ou outras características.
 
-## 8. Resposta à pergunta orientadora
+## 8. Comparação dos aluguéis por tipo de imóvel
+
+A análise dos 11.657 anúncios identificou quatro categorias de imóveis: apartamentos (7.194 registros), casas (2.841), studios e kitnets (1.381) e casas em condomínio (241).
+
+As casas em condomínio apresentaram o maior aluguel médio, de **R$ 3.912,55**, embora sua mediana tenha sido de apenas **R$ 2.200,00**. Em comparação, as casas apresentaram média de R$ 3.471,92 e mediana de R$ 2.600,00.
+
+Os studios e kitnets apresentaram os menores valores médios e medianos, de R$ 2.127,83 e R$ 1.850,00, respectivamente.
+
+A investigação das casas em condomínio revelou valores anunciados de até R$ 15.000,00. A exclusão experimental dos cinco maiores registros reduziu a média dessa categoria de R$ 3.912,55 para R$ 3.677,65, uma redução aproximada de **6,00%**, enquanto a mediana permaneceu em R$ 2.200,00.
+
+**Conclusão:** os aluguéis anunciados apresentam diferenças entre os tipos de imóvel, e a utilização conjunta de média e mediana oferece uma interpretação mais completa dessas diferenças.
+
+**Limitação:** as categorias possuem quantidades distintas de anúncios e não foram controladas simultaneamente características como área, localização e número de quartos. Portanto, não é possível atribuir as diferenças observadas exclusivamente ao tipo do imóvel.
+
+## 9. Resposta à pergunta orientadora
 
 **Quais características parecem acompanhar os maiores e os menores preços de aluguel e o que os dados não permitem concluir?**
 

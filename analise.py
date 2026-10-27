@@ -682,3 +682,136 @@ plt.savefig(
 plt.close()
 
 print("\nGráfico de sensibilidade do aluguel/m² salvo.")
+
+# Etapa 7.1 - Analise por tipo de imovel
+
+print("\nANÁLISE DOS ALUGUÉIS POR TIPO DE IMÓVEL")
+
+resumo_tipos = (
+    df.groupby("type")["rent"]
+    .agg(
+        quantidade="count",
+        media="mean",
+        mediana="median"
+    )
+    .sort_values("quantidade", ascending=False)
+)
+
+print(resumo_tipos.round(2).to_string())
+
+print("\nQuantidade de tipos de imóvel:")
+print(df["type"].nunique())
+
+# Etapa 7.2 - Investigacao das casas em condominio
+
+print("\nINVESTIGAÇÃO: CASAS EM CONDOMÍNIO")
+
+casas_condominio = df[
+    df["type"] == "Casa em condomínio"
+].copy()
+
+print("\nEstatísticas dos aluguéis:")
+print(casas_condominio["rent"].describe().round(2))
+
+print("\n5 maiores aluguéis de casas em condomínio:")
+
+print(
+    casas_condominio.nlargest(5, "rent")[
+        ["district", "area", "bedrooms", "garage", "rent"]
+    ].to_string(index=False)
+)
+
+print("\nComparação entre média e mediana:")
+print("Média:", round(casas_condominio["rent"].mean(), 2))
+print("Mediana:", round(casas_condominio["rent"].median(), 2))
+
+
+# Etapa 7.3 - Sensibilidade da media das casas em condominio
+
+print("\nSENSIBILIDADE: CASAS EM CONDOMÍNIO")
+
+media_original = casas_condominio["rent"].mean()
+
+# Retirada experimental dos cinco maiores registros
+indices_top5 = casas_condominio.nlargest(5, "rent").index
+
+casas_sem_top5 = casas_condominio.drop(
+    index=indices_top5
+)
+
+media_sem_top5 = casas_sem_top5["rent"].mean()
+
+diferenca = media_original - media_sem_top5
+variacao_percentual = (diferenca / media_original) * 100
+
+print("Quantidade original:", len(casas_condominio))
+print("Quantidade sem os cinco maiores:", len(casas_sem_top5))
+
+print("Média original:", round(media_original, 2))
+print("Média sem os cinco maiores:", round(media_sem_top5, 2))
+print("Diferença:", round(diferenca, 2))
+print("Redução percentual:", round(variacao_percentual, 2))
+
+print(
+    "Mediana sem os cinco maiores:",
+    round(casas_sem_top5["rent"].median(), 2)
+)
+
+print(
+    "Quantidade de anúncios com aluguel de R$ 15.000:",
+    (casas_condominio["rent"] == 15000).sum()
+)
+
+# Etapa 7.4 - Grafico de aluguel por tipo de imovel
+
+print("\nGERANDO GRÁFICO DE ALUGUEL POR TIPO DE IMÓVEL")
+
+resumo_grafico = resumo_tipos.copy()
+
+posicoes = range(len(resumo_grafico))
+largura = 0.35
+
+plt.figure(figsize=(11, 6))
+
+plt.bar(
+    [p - largura / 2 for p in posicoes],
+    resumo_grafico["media"],
+    width=largura,
+    label="Média"
+)
+
+plt.bar(
+    [p + largura / 2 for p in posicoes],
+    resumo_grafico["mediana"],
+    width=largura,
+    label="Mediana"
+)
+
+rotulos = [
+    f"{tipo}\n(n={quantidade})"
+    for tipo, quantidade in zip(
+        resumo_grafico.index,
+        resumo_grafico["quantidade"]
+    )
+]
+
+plt.xticks(
+    list(posicoes),
+    rotulos,
+    fontsize=9
+)
+
+plt.title("Aluguel médio e mediano por tipo de imóvel")
+plt.ylabel("Aluguel anunciado (R$)")
+plt.legend()
+plt.grid(axis="y", alpha=0.3)
+plt.tight_layout()
+
+plt.savefig(
+    pasta_graficos / "aluguel_por_tipo_imovel.png",
+    dpi=150
+)
+
+plt.close()
+
+print("Gráfico de aluguel por tipo de imóvel salvo.")

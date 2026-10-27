@@ -117,6 +117,22 @@ A comparação entre os rankings demonstrou que os imóveis com maiores aluguéi
 
 ![Sensibilidade do aluguel por metro quadrado](graficos/sensibilidade_aluguel_m2.png)
 
+### 5.7 Comparação dos aluguéis por tipo de imóvel
+
+O dataset apresenta quatro categorias de imóveis: apartamentos (7.194 anúncios), casas (2.841), studios e kitnets (1.381) e casas em condomínio (241).
+
+A comparação mostrou que as **casas em condomínio apresentam o maior aluguel médio (R$ 3.912,55)**, mas sua mediana é de apenas R$ 2.200,00. As casas, por sua vez, apresentam a maior mediana entre as categorias, de R$ 2.600,00.
+
+Os studios e kitnets apresentaram os menores valores de média (R$ 2.127,83) e mediana (R$ 1.850,00).
+
+A investigação das casas em condomínio identificou nove anúncios com aluguel de R$ 15.000,00. A exclusão experimental de cinco desses registros reduziu a média da categoria em aproximadamente **6%**, enquanto a mediana permaneceu inalterada.
+
+Esses resultados demonstram a importância de analisar média e mediana conjuntamente, especialmente quando existem anúncios com valores elevados.
+
+**Limitação:** as categorias diferem em quantidade de anúncios, área e outras características. As diferenças observadas não devem ser interpretadas como efeitos causais do tipo de imóvel.
+
+![Aluguel médio e mediano por tipo de imóvel](graficos/aluguel_por_tipo_imovel.png)
+
 ## 6. Cinco conclusões principais
 
 1. **Os aluguéis anunciados têm distribuição assimétrica à direita:** a média de R$ 3.250,81 supera a mediana de R$ 2.415,00.
