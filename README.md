@@ -188,6 +188,31 @@ Python 3.12 e acesso ao dataset no Kaggle. Git é opcional se o repositório for
 
 O programa apresenta os resultados estatísticos no terminal e gera seis gráficos na pasta `graficos/`. Dependendo do ambiente, pode ser necessário fechar janelas abertas pelo Matplotlib para a execução prosseguir.
 
+### Executando o dashboard interativo
+
+Além da análise exploratória realizada pelo arquivo `analise.py`, o projeto disponibiliza uma interface interativa desenvolvida com **Streamlit**, permitindo explorar os resultados diretamente pelo navegador.
+
+Após instalar as dependências do `requirements.txt` e colocar o arquivo `data.csv` na pasta principal do projeto, execute:
+
+```powershell
+python -m streamlit run dashboard.py
+```
+
+O Streamlit iniciará um servidor local, normalmente disponível em `http://localhost:8501`.
+
+O dashboard está organizado em quatro abas:
+
+1. **Visão geral:** apresenta indicadores de quantidade de anúncios, média e mediana dos aluguéis e comparação entre tipos de imóveis.
+2. **Localidades:** permite visualizar rankings de aluguéis médios, utilizando limites mínimos de 20, 30 ou 50 anúncios.
+3. **Aluguel por m²:** apresenta indicadores e análise de sensibilidade conforme diferentes limites mínimos de área.
+4. **Qualidade dos dados:** apresenta verificações de valores ausentes, duplicações e registros com áreas potencialmente inconsistentes.
+
+O filtro de tipo de imóvel, disponível na barra lateral, atualiza as análises das três primeiras abas. A aba de qualidade dos dados utiliza a base completa.
+
+**Observação:** o dashboard é uma ferramenta complementar de exploração. Os resultados científicos documentados em `CONCLUSOES.md` foram produzidos a partir da análise original, sem filtros interativos adicionais.
+
+O dataset não está incluído no repositório. Portanto, é necessário baixá-lo da fonte indicada antes de iniciar a interface.
+
 ### Verificação de reprodutibilidade realizada
 
 A reprodutibilidade foi avaliada inicialmente por meio da clonagem do repositório público do GitHub para uma pasta independente, com criação de um novo ambiente virtual Python e instalação das dependências declaradas no `requirements.txt`.
