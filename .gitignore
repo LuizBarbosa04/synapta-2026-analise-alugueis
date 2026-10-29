@@ -24,3 +24,4 @@ __pycache__/
 # Arquivos temporários do sistema
 .DS_Store
 Thumbs.db
+dashboard_backup.py
