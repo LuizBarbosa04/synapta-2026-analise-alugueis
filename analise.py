@@ -138,17 +138,11 @@ studios = df_geral[
     df_geral["type"] == "Studio e kitnet"
 ].copy()
 
-print("Quantidade de studios:", len(studios))
-
-print("\nEstatísticas dos aluguéis:")
-print(studios["rent"].describe())
-
-print("\nOs 5 studios mais caros:")
-print(
-    studios.nlargest(5, "rent")[
-        ["district", "area", "rent"]
-    ].to_string(index=False)
-)
+# Resumo objetivo: os detalhes dos cinco maiores aluguéis já são
+# investigados na análise geral, sem necessidade de outra tabela longa.
+print(f"Quantidade: {len(studios)}")
+print(f"Aluguel médio: R$ {formatar_numero(studios['rent'].mean())}")
+print(f"Aluguel mediano: R$ {formatar_numero(studios['rent'].median())}")
 
 
 # Etapa 2.10 - Sensibilidade da média dos studios
@@ -166,10 +160,7 @@ media_sem_maior = studios_sem_maior["rent"].mean()
 diferenca = media_studios - media_sem_maior
 impacto_percentual = (diferenca / media_studios) * 100
 
-print(f"Média original: R$ {media_studios:.2f}")
-print(f"Média sem o maior studio: R$ {media_sem_maior:.2f}")
-print(f"Diferença: R$ {diferenca:.2f}")
-print(f"Impacto percentual: {impacto_percentual:.2f}%")
+print(f"Impacto do maior anúncio na média: {formatar_numero(impacto_percentual)}%")
 
 # Etapa 2.11 - Registro automático do valor atípico
 
@@ -214,26 +205,28 @@ plt.hist(
     df_geral["rent"],
     bins=40,
     color="steelblue",
-    edgecolor="white"
+    edgecolor="white",
+    orientation="horizontal"
 )
 
-plt.axvline(
-    media,
+# Linhas horizontais de media e mediana
+plt.axhline(
+    y=media,
     color="red",
     linestyle="--",
-    label=f"Média: R$ {media:,.2f}"
+    label=f"Média: R$ {formatar_numero(media)}"
 )
 
-plt.axvline(
-    mediana,
+plt.axhline(
+    y=mediana,
     color="green",
     linestyle="--",
-    label=f"Mediana: R$ {mediana:,.2f}"
+    label=f"Mediana: R$ {formatar_numero(mediana)}"
 )
 
 plt.title("Distribuição dos preços de aluguel em São Paulo")
-plt.xlabel("Aluguel anunciado (R$)")
-plt.ylabel("Quantidade de imóveis")
+plt.xlabel("Quantidade de imóveis")
+plt.ylabel("Aluguel anunciado (R$)")
 plt.legend()
 
 plt.tight_layout()
@@ -730,7 +723,7 @@ print("Mediana:", round(casas_condominio["rent"].median(), 2))
 
 print("\nSENSIBILIDADE: CASAS EM CONDOMÍNIO")
 
-media_original = casas_condominio["rent"].mean()
+media_condominio_original = casas_condominio["rent"].mean()
 
 # Retirada experimental dos cinco maiores registros
 indices_top5 = casas_condominio.nlargest(5, "rent").index
@@ -741,13 +734,13 @@ casas_sem_top5 = casas_condominio.drop(
 
 media_sem_top5 = casas_sem_top5["rent"].mean()
 
-diferenca = media_original - media_sem_top5
-variacao_percentual = (diferenca / media_original) * 100
+diferenca = media_condominio_original - media_sem_top5
+variacao_percentual = (diferenca / media_condominio_original) * 100
 
 print("Quantidade original:", len(casas_condominio))
 print("Quantidade sem os cinco maiores:", len(casas_sem_top5))
 
-print("Média original:", round(media_original, 2))
+print("Média original:", round(media_condominio_original, 2))
 print("Média sem os cinco maiores:", round(media_sem_top5, 2))
 print("Diferença:", round(diferenca, 2))
 print("Redução percentual:", round(variacao_percentual, 2))
@@ -815,3 +808,108 @@ plt.savefig(
 plt.close()
 
 print("Gráfico de aluguel por tipo de imóvel salvo.")
+
+
+# Investigacao complementar - Aluguel por m² por tipo de imovel
+
+print("\nALUGUEL POR M² POR TIPO DE IMÓVEL")
+
+# Reaproveitar o cálculo já realizado na etapa 6.1.
+df_tipos_m2 = df_preco_m2
+
+resumo_tipos_m2 = (
+    df_tipos_m2.groupby("type")["aluguel_m2"]
+    .agg(
+        quantidade="count",
+        media="mean",
+        mediana="median",
+        minimo="min",
+        maximo="max"
+    )
+    .sort_values("mediana", ascending=False)
+)
+
+print(resumo_tipos_m2.round(2).to_string())
+
+# ==================================================
+# ETAPA 8.6 - ALUGUEL POR M² POR TIPO DE IMÓVEL
+# ==================================================
+
+print("\nALUGUEL POR M² POR TIPO DE IMÓVEL")
+
+# Considerar apenas imóveis com área positiva
+df_m2_tipo = df_geral[df_geral["area"] > 0].copy()
+
+# Criar coluna de aluguel por m²
+df_m2_tipo["aluguel_m2"] = (
+    df_m2_tipo["rent"] / df_m2_tipo["area"]
+)
+
+# Agrupar por tipo de imóvel
+aluguel_m2_por_tipo = (
+    df_m2_tipo
+    .groupby("type")
+    .agg(
+        quantidade=("type", "count"),
+        media=("aluguel_m2", "mean"),
+        mediana=("aluguel_m2", "median"),
+        minimo=("aluguel_m2", "min"),
+        maximo=("aluguel_m2", "max")
+    )
+    .round(2)
+    .sort_values("media", ascending=False)
+)
+
+print(aluguel_m2_por_tipo)
+
+# ==================================================
+# GRÁFICO - ALUGUEL POR M² POR TIPO DE IMÓVEL
+# ==================================================
+
+print("\nGERANDO GRÁFICO DE ALUGUEL POR M² POR TIPO DE IMÓVEL")
+
+tipos = aluguel_m2_por_tipo.index.tolist()
+medias = aluguel_m2_por_tipo["media"].tolist()
+medianas = aluguel_m2_por_tipo["mediana"].tolist()
+quantidades = aluguel_m2_por_tipo["quantidade"].tolist()
+
+x = range(len(tipos))
+largura = 0.35
+
+plt.figure(figsize=(10, 6))
+
+plt.bar(
+    [i - largura / 2 for i in x],
+    medias,
+    width=largura,
+    label="Média"
+)
+
+plt.bar(
+    [i + largura / 2 for i in x],
+    medianas,
+    width=largura,
+    label="Mediana"
+)
+
+plt.xticks(
+    x,
+    [f"{tipo}\n(n={qtd})" for tipo, qtd in zip(tipos, quantidades)],
+    rotation=0
+)
+
+plt.title("Aluguel por m² por tipo de imóvel")
+plt.xlabel("Tipo de imóvel")
+plt.ylabel("Aluguel por m² (R$)")
+plt.legend()
+plt.tight_layout()
+
+plt.savefig(
+    pasta_graficos / "aluguel_m2_por_tipo_imovel.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.show()
+
+print("Gráfico de aluguel por m² por tipo de imóvel salvo!")

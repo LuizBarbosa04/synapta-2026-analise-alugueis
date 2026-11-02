@@ -234,6 +234,36 @@ with aba_m2:
                     "Mediana": st.column_config.NumberColumn("Mediana (R$/m²)", format="R$ %.2f"),
                 },
             )
+        # Comparação complementar: mesmo filtro por tipo e área aplicado aos indicadores.
+        st.subheader("Aluguel por m² por tipo de imóvel")
+        resumo_m2_tipos = (
+            df_area.groupby("type")["aluguel_m2"]
+            .agg(quantidade="count", media="mean", mediana="median")
+            .sort_values("mediana", ascending=False)
+        )
+        st.bar_chart(
+            resumo_m2_tipos[["media", "mediana"]],
+            x_label="Tipo de imóvel",
+            y_label="Aluguel por m² (R$)",
+            stack=False,
+        )
+        st.dataframe(
+            resumo_m2_tipos.reset_index(),
+            hide_index=True,
+            width="stretch",
+            column_config={
+                "type": "Tipo de imóvel",
+                "quantidade": "Anúncios",
+                "media": st.column_config.NumberColumn("Média (R$/m²)", format="R$ %.2f"),
+                "mediana": st.column_config.NumberColumn("Mediana (R$/m²)", format="R$ %.2f"),
+            },
+        )
+        st.caption(
+            "A média pode ser afetada por áreas declaradas muito pequenas. "
+            "Observe também a mediana, especialmente para casas em condomínio. "
+            "Os valores dependem dos filtros de tipo e área mínima selecionados."
+        )
+
     st.caption(
         "Os limites são cenários exploratórios. A base original permanece inalterada; "
         "áreas extremamente pequenas podem causar valores por m² pouco plausíveis."

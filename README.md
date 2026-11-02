@@ -4,7 +4,7 @@
 
 **Instituição:** UNINASSAU — Maceió/AL  
 **Curso:** Ciência da Computação  
-**Modalidade:** Análise exploratória de dados  
+**Modalidade:** Análise exploratória de dados com dashboard interativo  
 **Opção escolhida:** 1 — Preços de aluguel em São Paulo
 
 ## 1. Objetivo
@@ -42,6 +42,8 @@ As descrições refletem a interpretação utilizada nesta análise; a base não
 - Python 3.12
 - Pandas 3.1.0
 - Matplotlib 3.11.2
+- Streamlit 1.66.1 (dashboard interativo)
+- Altair (gráficos do Streamlit)
 - Visual Studio Code
 - Git e GitHub
 
@@ -58,7 +60,8 @@ A análise exploratória foi desenvolvida nas seguintes etapas:
 7. Investigação da associação entre área e aluguel, por meio da correlação de Pearson, e comparação dos aluguéis por quantidade de quartos.
 8. Cálculo do aluguel por metro quadrado para os 11.655 imóveis com área positiva, investigação de registros com áreas extremamente pequenas e análise de sensibilidade dos limites mínimos de área.
 9. Comparação entre quatro tipos de imóveis, considerando quantidade de anúncios, média e mediana, com investigação adicional dos maiores valores de casas em condomínio.
-10. Construção e interpretação de seis gráficos, acompanhados de conclusões e limitações metodológicas.
+10. Construção e interpretação de sete gráficos, acompanhados de conclusões e limitações metodológicas.
+11. Desenvolvimento de um dashboard interativo com filtros por tipo de imóvel e limites mínimos de anúncios e área.
 
 **Decisões metodológicas:** preservar os registros originais sempre que não houver evidência suficiente para comprovar erros; utilizar análises de sensibilidade para examinar a influência dos critérios de seleção; e evitar interpretações causais a partir de associações descritivas.
 
@@ -139,6 +142,23 @@ Esses resultados demonstram a importância de analisar média e mediana conjunta
 
 ![Aluguel médio e mediano por tipo de imóvel](graficos/aluguel_por_tipo_imovel.png)
 
+### 5.8 Aluguel por m² por tipo de imóvel
+
+A comparação por metro quadrado complementa os valores de aluguel total. Foram utilizados os **11.655 anúncios com área positiva**, sem excluir automaticamente registros suspeitos.
+
+| Tipo de imóvel | Anúncios | Média (R$/m²) | Mediana (R$/m²) |
+|---|---:|---:|---:|
+| Studio e kitnet | 1.381 | 72,74 | 61,11 |
+| Apartamento | 7.193 | 48,47 | 41,58 |
+| Casa em condomínio | 241 | 68,29 | 31,25 |
+| Casa | 2.840 | 27,70 | 24,74 |
+
+Studios e kitnets apresentam o maior aluguel por m² tanto na média quanto na mediana, apesar de apresentarem o menor aluguel total médio. Casas em condomínio registram uma diferença elevada entre média e mediana, compatível com a influência de valores extremos e áreas possivelmente inconsistentes.
+
+**Limitação:** os dados são descritivos; o cálculo não controla simultaneamente localização, metragem, conservação e outras características. Valores extremos não são automaticamente considerados erros.
+
+![Aluguel médio e mediano por m² por tipo de imóvel](graficos/aluguel_m2_por_tipo_imovel.png)
+
 ## 6. Principais conclusões
 
 1. **Distribuição dos aluguéis:** a média de R$ 3.250,81 supera a mediana de R$ 2.415,00, indicando assimetria à direita na distribuição dos valores anunciados.
@@ -148,6 +168,7 @@ Esses resultados demonstram a importância de analisar média e mediana conjunta
 5. **Influência de valores extremos:** a retirada experimental do anúncio de R$ 25.000 reduziu a média geral em aproximadamente 0,057% e a média dos studios em aproximadamente 0,78%.
 6. **Aluguel por metro quadrado:** foram identificados quatro anúncios com áreas inferiores a 5 m². Sua exclusão experimental reduziu a média do aluguel por m² de R$ 46,69 para R$ 45,65, enquanto a mediana permaneceu em R$ 37,50.
 7. **Diferenças por tipo de imóvel:** casas em condomínio apresentaram o maior aluguel médio (R$ 3.912,55), mas não a maior mediana. Isso evidencia a importância de comparar diferentes medidas estatísticas.
+8. **Aluguel por m² por tipo:** studios e kitnets apresentaram a maior mediana (R$ 61,11/m²), enquanto casas apresentaram a menor (R$ 24,74/m²).
 
 As análises detalhadas, as decisões metodológicas, as limitações e a resposta à pergunta orientadora estão documentadas em [CONCLUSOES.md](CONCLUSOES.md).
 
@@ -186,32 +207,30 @@ Python 3.12 e acesso ao dataset no Kaggle. Git é opcional se o repositório for
    python analise.py
    ```
 
-O programa apresenta os resultados estatísticos no terminal e gera seis gráficos na pasta `graficos/`. Dependendo do ambiente, pode ser necessário fechar janelas abertas pelo Matplotlib para a execução prosseguir.
+O programa apresenta os resultados estatísticos no terminal e gera sete gráficos na pasta `graficos/`. Dependendo do ambiente, pode ser necessário fechar janelas abertas pelo Matplotlib para a execução prosseguir.
 
-### Executando o dashboard interativo
+### Dashboard interativo (Streamlit)
 
-Além da análise exploratória realizada pelo arquivo `analise.py`, o projeto disponibiliza uma interface interativa desenvolvida com **Streamlit**, permitindo explorar os resultados diretamente pelo navegador.
+Além dos **sete gráficos estáticos** gerados por `analise.py`, o projeto inclui `dashboard.py`, que permite explorar os dados diretamente no navegador. O dashboard **não substitui** os sete PNGs; é uma visualização complementar calculada a partir do CSV local.
 
-Após instalar as dependências do `requirements.txt` e colocar o arquivo `data.csv` na pasta principal do projeto, execute:
+As quatro abas disponíveis são:
 
-```powershell
+- **Visão geral:** quantidade de anúncios, média e mediana dos aluguéis e comparação entre tipos de imóvel.
+- **Localidades:** ranking de aluguéis médios com limite mínimo selecionável de 20, 30 ou 50 anúncios.
+- **Aluguel por m²:** média e mediana, sensibilidade à área mínima (1, 5, 10, 15 ou 20 m²) e comparação por tipo de imóvel. Os resultados são recalculados conforme os filtros.
+- **Qualidade dos dados:** valores ausentes, duplicados, áreas iguais a zero e registros com áreas positivas inferiores a 5 m².
+
+O filtro lateral de tipo de imóvel afeta as três primeiras abas. A aba de qualidade dos dados sempre utiliza a base completa.
+
+**Para executar o dashboard**, mantenha `data.csv` na raiz do projeto e use:
+
+```bash
 python -m streamlit run dashboard.py
 ```
 
-O Streamlit iniciará um servidor local, normalmente disponível em `http://localhost:8501`.
+O Streamlit exibirá no terminal o endereço local de acesso ao painel. É necessário instalar as dependências indicadas em `requirements.txt` antes da execução.
 
-O dashboard está organizado em quatro abas:
-
-1. **Visão geral:** apresenta indicadores de quantidade de anúncios, média e mediana dos aluguéis e comparação entre tipos de imóveis.
-2. **Localidades:** permite visualizar rankings de aluguéis médios, utilizando limites mínimos de 20, 30 ou 50 anúncios.
-3. **Aluguel por m²:** apresenta indicadores e análise de sensibilidade conforme diferentes limites mínimos de área.
-4. **Qualidade dos dados:** apresenta verificações de valores ausentes, duplicações e registros com áreas potencialmente inconsistentes.
-
-O filtro de tipo de imóvel, disponível na barra lateral, atualiza as análises das três primeiras abas. A aba de qualidade dos dados utiliza a base completa.
-
-**Observação:** o dashboard é uma ferramenta complementar de exploração. Os resultados científicos documentados em `CONCLUSOES.md` foram produzidos a partir da análise original, sem filtros interativos adicionais.
-
-O dataset não está incluído no repositório. Portanto, é necessário baixá-lo da fonte indicada antes de iniciar a interface.
+**Importante:** as comparações são descritivas, baseadas em preços anunciados. O dashboard não estabelece relações causais nem representa necessariamente todo o mercado imobiliário de São Paulo.
 
 ### Verificação de reprodutibilidade realizada
 
@@ -221,18 +240,18 @@ Foi utilizada uma cópia local do dataset obtido anteriormente. A execução rep
 
 Posteriormente, o projeto foi ampliado com análises do aluguel por metro quadrado, sensibilidade à área mínima e comparação por tipo de imóvel.
 
-Após essas atualizações, foi realizada uma nova execução integral do `analise.py` no ambiente de desenvolvimento, finalizada com **código de saída 0**, sem erros de execução. Também foi confirmada a presença dos seis arquivos de gráficos gerados.
+Após essas atualizações, foi realizada uma nova execução integral do `analise.py` no ambiente de desenvolvimento, finalizada com **código de saída 0**, sem erros de execução. Também foi confirmada a presença dos sete arquivos de gráficos gerados.
 
 **Limitações da validação:** a versão ampliada ainda não foi reproduzida novamente em um ambiente virtual independente. Além disso, não foi realizado um novo download diretamente da página do Kaggle durante os testes de reprodutibilidade.
 
 ## 9. Declaração de uso de inteligência artificial generativa
 
-Foi utilizado **ChatGPT (OpenAI)** como apoio educacional e técnico para explicar conceitos estatísticos, orientar a elaboração e revisão de código Python com Pandas e Matplotlib, discutir tratamentos de dados e valores atípicos, sugerir gráficos, auxiliar na documentação e orientar procedimentos com Git e GitHub.
+Foi utilizado **ChatGPT (OpenAI)** como apoio educacional e técnico para explicar conceitos estatísticos, orientar a elaboração e revisão de código Python com Pandas, Matplotlib e Streamlit, discutir tratamentos de dados e valores atípicos, sugerir gráficos, auxiliar na documentação e orientar procedimentos com Git e GitHub.
 
-**Verificações realizadas pelo candidato:** execução dos códigos em Python 3.12, conferência das saídas e dos indicadores estatísticos, inspeção dos gráficos, investigação de valores atípicos e teste da versão inicial a partir de uma cópia clonada do repositório com ambiente virtual independente. A versão ampliada foi executada integralmente no ambiente local.
+**Verificações realizadas pelo candidato:** execução dos códigos em Python 3.12, conferência das saídas e dos indicadores estatísticos, inspeção dos gráficos, investigação de valores atípicos e teste da versão inicial a partir de uma cópia clonada do repositório com ambiente virtual independente. A versão ampliada do script de análise foi executada integralmente no ambiente local. O dashboard deve ser testado visualmente no navegador.
 
 As interpretações são apresentadas com as limitações identificadas. A utilização da ferramenta não implica que ela tenha verificado externamente a veracidade dos anúncios. A obtenção direta do dataset pelo link do Kaggle continua sem um novo teste de download nesta auditoria.
 
 ## 10. Estado do projeto
 
-Análise exploratória executada e documentada, com seis gráficos gerados. A versão inicial teve reprodutibilidade testada em ambiente independente utilizando uma cópia local do dataset; a versão ampliada passou por execução integral no ambiente de desenvolvimento. Projeto em revisão final para submissão à Etapa 2 do processo seletivo SYNAPTA 2026.
+Análise exploratória executada e documentada, com sete gráficos gerados e dashboard interativo. A versão inicial teve reprodutibilidade testada em ambiente independente utilizando uma cópia local do dataset; a versão ampliada passou por execução integral no ambiente de desenvolvimento. Projeto em revisão final para submissão à Etapa 2 do processo seletivo SYNAPTA 2026.
